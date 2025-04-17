@@ -350,7 +350,9 @@ def download_image(url, product_id):
 def get_product_details(url):
     details = {
         "description": None,
-        "overview_items": []  # Store all li elements
+        "overview_items": [],  # Store all li elements
+        "product_rating": None,  # تقييم المنتج
+        "rating_count": None  # عدد التقيمات
     }
     
     try:
@@ -390,6 +392,20 @@ def get_product_details(url):
                 
         except Exception as e:
             print(f"Could not find overview container on {url}: {str(e)}")
+        
+        try:
+            # Get product rating
+            rating_element = driver.find_element(By.CSS_SELECTOR, "span.RatingPreviewStar_text__ZO_T7")
+            details["product_rating"] = rating_element.text.strip()
+        except:
+            details["product_rating"] = None
+            
+        try:
+            # Get rating count
+            count_element = driver.find_element(By.CSS_SELECTOR, "span.RatingPreviewStar_countText__MdxCQ")
+            details["rating_count"] = count_element.text.strip()
+        except:
+            details["rating_count"] = None
         
         # Close the current window
         driver.close()
@@ -455,6 +471,8 @@ try:
                 "صورة المنتج URL": src if src else None,
                 "وصف المنتج": product_details.get("description"),
                 "تفاصيل المنتج": "\n• ".join([""] + product_details.get("overview_items", [])),  # Bullet points
+                "تقييم المنتج": product_details.get("product_rating"),
+                "عدد التقيمات": product_details.get("rating_count"),
                 "Image Data": image_data
             }
             
